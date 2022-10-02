@@ -33,19 +33,39 @@ void executeCommand(char *myCommand)
 	}
 	argv[i] = NULL; //terminate the argv array with NULL
 
-	char pathName[MAX_STATEMENT_LENGTH + MAX_CWDPATH_SIZE];
-	sprintf(pathName, "/bin/%s", argv[0]); //skish only executes commands in the /bin directory.
+	//argv[0] is the name of the command/executable.
 
-	int ret = execv(pathName, argv);
-	if(ret < 0)
+	char executableDirPath[MAX_CWDPATH_SIZE];
+
+	int executableExists = findExecutable(argv[0], executableDirPath);
+
+	if(executableExists < 0)
 	{
-		fprintf(stderr, "failed to execute command: %s\n", myCommand);
+		//this could be a shell command.
+		handleShellCommand(argv);
 	}
+	else
+	{
+		//this is an executable only.
+		char pathName[MAX_STATEMENT_LENGTH + MAX_CWDPATH_SIZE];
+		sprintf(pathName, "%s/%s", executableDirPath, argv[0]); //skish only executes commands in the /bin directory.
+
+		int ret = execv(pathName, argv);
+		if(ret < 0)
+		{
+			printAndExit("Failed to execute command");
+		}
+	}
+
 }
 
 void getStatement(pid_t rootpid)
 {
 	//this is the root shell's loop.
+	//the shell forks a child, the child reads a command and executes it.
+	//this is not suitable in all cases, for example in case of the cd command
+	//if the child cd's into a different directory and exits, then it is of no use.
+	//therefore some commands need to be executed by the root shell itself.
 	while(1)
 	{
 		if(getpid() == rootpid)
@@ -68,14 +88,13 @@ void getStatement(pid_t rootpid)
 	//this is the child's loop. We could have used GOTO but they say that it is bad practice.
 	while(1)
 	{
-		fflush(stdout);
 		char statement[MAX_STATEMENT_LENGTH];
 		char *readStatus = fgets(statement, MAX_STATEMENT_LENGTH, stdin);
 
 		if(!readStatus)
 		{
 			//kill the root shell.
-			kill(rootpid, SIGTERM);
+			kill(getppid(), SIGTERM);
 			exit(-1);
 		}
 
@@ -97,7 +116,8 @@ void getStatement(pid_t rootpid)
 
 		if(strlen(myCommand) == 0) exit(0);
 
-		pid_t pipedBrother = -1;
+		pid_t brother = -1;
+
 		if(statement[i] == '|')
 		{
 			char restOfIt[MAX_STATEMENT_LENGTH];
@@ -111,8 +131,8 @@ void getStatement(pid_t rootpid)
 			int fd[2];
 			if(pipe(fd) < 0) printAndExit("pipe creation failed");
 
-			pipedBrother = fork();
-			if(pipedBrother == 0)
+			brother = fork();
+			if(brother == 0)
 			{
 				//close the write end of the pipe.
 				close(fd[1]);
@@ -141,17 +161,14 @@ void getStatement(pid_t rootpid)
 			The prompt must be printed only after all the processes in the pipe chain exit.
 			which requires a 'wait-chain';
 		*/
-		if(fork())
-		{
-			//this procs job is to wait for the pipe brother to end.
-			if(pipedBrother > 0)
-			{
-				int status;
-				waitpid(pipedBrother,&status, 0);
-			}
-			exit(0);
-		}
-		else
+		//if(fork())
+		//{
+		//	//this procs job is to wait for the pipe brother to end.
+		//	int status;
+		//	waitpid(brother, &status, 0); //if piped brother isnt there, it will just wait for its child to finish.
+		//	exit(0);
+		//}
+		//else
 			executeCommand(myCommand);
 		break;
 	}

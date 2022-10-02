@@ -8,6 +8,8 @@
 
 void printAndExit(char *);
 void printPrompt();
+int findExecutable(char *, char *);
+int handleShellCommand(char*[]);
 char * trim(char *);
 
 #endif

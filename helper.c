@@ -1,15 +1,63 @@
 #include "helper.h"
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <dirent.h>
 
 void printAndExit(char *message)
 {
 	fprintf(stderr, "%s", message);
 	fprintf(stderr, "%s", strerror(errno));
 	exit(-1);
+}
+
+int findExecutable(char *name, char *buf)
+{
+	//this function tries to find the given executable in the directories listed in paths.txt
+	FILE *fptr = fopen("./paths.txt", "r");
+	if(!fptr)
+		printAndExit("paths.txt not found!");
+
+	char currentDirectoryPath[MAX_CWDPATH_SIZE];
+	while(fscanf(fptr, "%s", currentDirectoryPath) != EOF)
+	{
+		DIR *thisDir = opendir(currentDirectoryPath);
+		if(!thisDir)
+		{
+			printAndExit("Couldn't open directory\n");
+		}
+		struct dirent *currentEntry;
+
+		while(currentEntry = readdir(thisDir))
+		{
+			if(strcmp(currentEntry->d_name, name) == 0)
+			{
+				//name has matched but check if it is a file.
+				if(currentEntry->d_type == DT_REG)
+				{
+					//this is the correct directory.
+					strcpy(buf, currentDirectoryPath);
+					return 0;
+				}
+			}
+		}
+		closedir(thisDir);
+	}
+	fclose(fptr);
+	return -1;
+}
+int handleShellCommand(char *cmds[])
+{
+	if(strcmp(cmds[0], "exit") == 0)
+	{
+		kill(getppid(), SIGTERM);
+		exit(0);
+	}
+	fprintf(stderr, "Command not found!\n");
 }
 
 void printPrompt()
