@@ -30,10 +30,10 @@ void initPaths()
 
 	FILE *fptr = fopen(filePath, "w");
 
-	fprintf(fptr, "%s ", ".");
-	fprintf(fptr, "%s ", "/bin");
-	fprintf(fptr, "%s ", "/usr/bin");
-	fprintf(fptr, "%s ", "/usr/sbin");
+	fprintf(fptr, "%s ", "./");
+	fprintf(fptr, "%s ", "/bin/");
+	fprintf(fptr, "%s ", "/usr/bin/");
+	fprintf(fptr, "%s ", "/usr/sbin/");
 
 	fclose(fptr);
 }
@@ -76,7 +76,7 @@ int findExecutable(char *name, char *buf)
 			if(strcmp(currentEntry->d_name, name) == 0)
 			{
 				//name has matched but check if it is a file.
-				if(currentEntry->d_type == DT_REG)
+				if(currentEntry->d_type != DT_DIR)
 				{
 					//this is the correct directory.
 					strcpy(buf, currentDirectoryPath);
