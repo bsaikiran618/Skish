@@ -138,8 +138,8 @@ void getStatement()
 		{
 			if(special == 1)
 			{
-				int mainPipe[2];
-				int commandPipe[2];
+				int mainPipe[2]; //used to send the output of the child to the parent.
+				int commandPipe[2]; //used to send the rest of the commmand to the child from the parent.
 				if(pipe(mainPipe) < 0)
 				{
 					printErr("pipe failed!\n");

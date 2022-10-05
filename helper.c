@@ -62,6 +62,11 @@ int handleShellCommand(char *cmds[])
 		kill(getppid(), SIGTERM);
 		exit(0);
 	}
+	if(strcmp(cmds[0], "cd") == 0)
+	{
+		chdir(cmds[1]);
+		return 0;
+	}
 	fprintf(stderr, "Command not found!\n");
 }
 
