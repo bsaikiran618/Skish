@@ -8,11 +8,16 @@
 #include <sys/types.h>
 #include <dirent.h>
 
-void printAndExit(char *message)
+void errExit(char *message)
 {
 	fprintf(stderr, "%s", message);
 	fprintf(stderr, "%s", strerror(errno));
 	exit(-1);
+}
+void printErr(char *message)
+{
+	fprintf(stderr, "%s", message);
+	fprintf(stderr, "%s", strerror(errno));
 }
 
 int findExecutable(char *name, char *buf)
@@ -20,7 +25,7 @@ int findExecutable(char *name, char *buf)
 	//this function tries to find the given executable in the directories listed in paths.txt
 	FILE *fptr = fopen("./paths.txt", "r");
 	if(!fptr)
-		printAndExit("paths.txt not found!");
+		errExit("paths.txt not found!");
 
 	char currentDirectoryPath[MAX_CWDPATH_SIZE];
 	while(fscanf(fptr, "%s", currentDirectoryPath) != EOF)
@@ -28,7 +33,7 @@ int findExecutable(char *name, char *buf)
 		DIR *thisDir = opendir(currentDirectoryPath);
 		if(!thisDir)
 		{
-			printAndExit("Couldn't open directory\n");
+			errExit("Couldn't open directory\n");
 		}
 		struct dirent *currentEntry;
 
@@ -67,11 +72,11 @@ void printPrompt()
 	char cwdPath[MAX_CWDPATH_SIZE];
 
 	if(gethostname(hostname, MAX_HOSTNAME_SIZE) < 0)
-		printAndExit("gethostname failed\n");
+		errExit("gethostname failed\n");
 	if(getlogin_r(username, MAX_USERNAME_SIZE) < 0)
-		printAndExit("getlogin_r failed\n");
+		errExit("getlogin_r failed\n");
 	if(getcwd(cwdPath, MAX_CWDPATH_SIZE) == NULL)
-		printAndExit("getcwd failed\n");
+		errExit("getcwd failed\n");
 
 	fprintf(stdout, "\033[1;32m"); // To set color.
 	fprintf(stdout, "%s", username); 
@@ -116,4 +121,33 @@ char * trim(char * message)
 	temp[k] = '\0';
 	strcpy(message, temp);
 	return message;
+}
+int tokenize(char *string, char **argv, int len)
+{
+	char *token = strtok(string, " ");
+	int i = 0;
+	argv[i++] = token;
+	
+	while(token = strtok(NULL, " "))
+	{
+		if(i >= len) return -1;
+		argv[i++] = token;
+	}
+	
+	argv[i] = NULL;
+
+	return 0;
+}
+char * revStr(char *str)
+{
+	int left = 0, right = strlen(str) - 1;
+	while(left < right)
+	{
+		char temp = str[left];
+		str[left] = str[right];
+		str[right] = temp;
+		left++;
+		right--;
+	}
+	return str;
 }
