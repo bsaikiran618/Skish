@@ -203,6 +203,7 @@ void getStatement()
 
 int main(int argc, char *argv[])
 {
+	initPaths();
 	while(1)
 	{
 		printPrompt();

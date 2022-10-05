@@ -6,6 +6,8 @@
 #define MAX_CWDPATH_SIZE 1024
 #define MAX_STATEMENT_LENGTH 2048
 
+void initPaths();
+
 void errExit(char *);
 void printErr(char *);
 

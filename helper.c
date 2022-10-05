@@ -8,6 +8,35 @@
 #include <sys/types.h>
 #include <dirent.h>
 
+void initPaths()
+{
+	//check if paths.txt exists in the $HOME directory.
+	DIR *dir = opendir(getenv("HOME"));
+	if(!dir)
+		errExit("couldn't open home directory\n");
+	struct dirent * entry;
+
+	while(entry = readdir(dir))
+	{
+		if(entry->d_type == DT_REG && strcmp("paths.txt", entry->d_name) == 0)
+		{
+			//paths.txt exists.
+			return;
+		}
+	}
+	char filePath[MAX_CWDPATH_SIZE];
+	strcpy(filePath, getenv("HOME"));
+	strcat(filePath, "/paths.txt");
+
+	FILE *fptr = fopen(filePath, "w");
+
+	fprintf(fptr, "%s ", ".");
+	fprintf(fptr, "%s ", "/bin");
+	fprintf(fptr, "%s ", "/usr/bin");
+	fprintf(fptr, "%s ", "/usr/sbin");
+
+	fclose(fptr);
+}
 void errExit(char *message)
 {
 	fprintf(stderr, "%s", message);
@@ -23,7 +52,12 @@ void printErr(char *message)
 int findExecutable(char *name, char *buf)
 {
 	//this function tries to find the given executable in the directories listed in paths.txt
-	FILE *fptr = fopen("./paths.txt", "r");
+	
+	char pathsFilePath[MAX_CWDPATH_SIZE];
+	strcpy(pathsFilePath, getenv("HOME"));
+	strcat(pathsFilePath, "/paths.txt");
+
+	FILE *fptr = fopen(pathsFilePath, "r");
 	if(!fptr)
 		errExit("paths.txt not found!");
 
