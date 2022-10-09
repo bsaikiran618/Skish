@@ -8,6 +8,8 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <signal.h>
+#include <readline/readline.h>
+#include <readline/history.h>
 
 #include "helper.h"
 
@@ -51,16 +53,19 @@ void executeCommand(char *myCommand)
 
 int getCommand(char *myCommand, char *restOfIt, int len)
 {
-	char statement[MAX_STATEMENT_LENGTH];
-	char *readStatus = fgets(statement, MAX_STATEMENT_LENGTH, stdin);
+	char *promptLine = (char *) malloc(sizeof(char) * (MAX_CWDPATH_SIZE + MAX_USERNAME_SIZE + MAX_HOSTNAME_SIZE + 2));
+	getPrompt(promptLine);
+	char *statement = readline(promptLine);
 
-	if(!readStatus)
+	if(!statement)
 	{
 		//if there was a EOF, we have to die.
 		exit(-1);
 	}
 
 	trim(statement);
+
+	add_history(statement);
 
 	int statementLen = strlen(statement);
 	int i = 0, j = statementLen - 1;
@@ -87,6 +92,7 @@ int getCommand(char *myCommand, char *restOfIt, int len)
 	strcpy(restOfIt, statement);
 	trim(restOfIt);
 	
+	free(promptLine);
 	return specialCode;
 }
 
@@ -151,7 +157,7 @@ void getStatement()
 					return;
 				}
 
-				pid_t child2;
+				pid_t child2; //this child will read the remaining command on the left of the pipe.
 				if((child2 = fork()) < 0)
 				{
 					printErr("fork failed!\n");
@@ -206,7 +212,6 @@ int main(int argc, char *argv[])
 	initPaths();
 	while(1)
 	{
-		printPrompt();
 		getStatement();
 	}
 	return 0;

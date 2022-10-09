@@ -11,7 +11,7 @@ void initPaths();
 void errExit(char *);
 void printErr(char *);
 
-void printPrompt();
+void getPrompt(char *);
 int findExecutable(char *, char *);
 int handleShellCommand(char*[]);
 int tokenize(char *, char **, int);

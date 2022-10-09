@@ -104,11 +104,12 @@ int handleShellCommand(char *cmds[])
 	fprintf(stderr, "Command not found!\n");
 }
 
-void printPrompt()
+void getPrompt(char * promptLine)
 {
 	char username[MAX_USERNAME_SIZE];
 	char hostname[MAX_USERNAME_SIZE];
 	char cwdPath[MAX_CWDPATH_SIZE];
+
 
 	if(gethostname(hostname, MAX_HOSTNAME_SIZE) < 0)
 		errExit("gethostname failed\n");
@@ -117,19 +118,8 @@ void printPrompt()
 	if(getcwd(cwdPath, MAX_CWDPATH_SIZE) == NULL)
 		errExit("getcwd failed\n");
 
-	fprintf(stdout, "\033[1;32m"); // To set color.
-	fprintf(stdout, "%s", username); 
-	fprintf(stdout, "\033[1;37m"); 
-	fprintf(stdout, "@");
-	fprintf(stdout, "\033[1;34m"); 
-	fprintf(stdout, "%s", hostname);
-	fprintf(stdout, "\033[1;37m"); 
-	fprintf(stdout, ":");
-	fprintf(stdout, "\033[1;37m"); 
-	fprintf(stdout, "%s", cwdPath);
-	fprintf(stdout, "\033[1;33m"); 
-	fprintf(stdout, "$ ");
-	fprintf(stdout, "\033[0;37m"); 
+	fflush(stdout);
+	sprintf(promptLine, "\033[1;32m%s\033[1;37m@\033[1;34m%s\033[1;37m:\033[1;37m%s\033[1;33m$\033[0;37m ",username, hostname, cwdPath); // To set color.
 }
 
 char * trim(char * message)
