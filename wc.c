@@ -1,9 +1,14 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <fcntl.h>
+#include <sys/stat.h>
 
 struct result {
-	int lines = 0;
-	int words = 0;
-	int characters = 0;
+	int lines;
+	int words;
+	int characters;
 };
 
 int iswhitespace(char c)
@@ -21,26 +26,29 @@ int iswhitespace(char c)
 struct result count()
 {
 	struct result r;
+	r.lines = 0;
+	r.words = 0;
+	r.characters = 0;
 
 	char c, prev = '\0';
 	while((c = fgetc(stdin)) != EOF)
 	{
-		c = fgetc(stdin);
 		r.characters++;
 		
 		if(iswhitespace(c) && prev!='\0' && !iswhitespace(prev))
 		{
-			if(c == '\n') r.lines++;
+			if(c == '\n'){r.lines++; if(!iswhitespace(prev))r.words++;}
 			if(c == ' ') r.words++;
 		}
 		
 		prev = c;
 	}
+	if(c == EOF && prev!='\0' && !iswhitespace(prev)) r.words++;
 
-	return result;
+	return r;
 }
 
-int main(int argc, int *argv[])
+int main(int argc, char * argv[])
 {
 	//if argc > 1, read them as files.
 	//else read from stdin
@@ -52,20 +60,20 @@ int main(int argc, int *argv[])
 			int fd = open(argv[i], O_RDONLY);
 			if(fd < 0)
 			{
-				fprintf(stderr, "Failed to open file: %d\n", argv[i]);
+				fprintf(stderr, "Failed to open file: %s\n", argv[i]);
 				exit(-1);
 			}
 
 			dup2(fd, 0);
 			struct result r = count();
 
-			printf("%d\t%d\t%d\n", r.lines, r.words, r.characters);
+			printf("\t%d\t%d\t%d\n", r.lines, r.words, r.characters);
 		}
 	}
 	else
 	{
 		struct result r = count();
-		printf("%d\t%d\t%d\n", r.lines, r.words, r.characters);
+		printf("\t%d\t%d\t%d\n", r.lines, r.words, r.characters);
 	}
 	
 
