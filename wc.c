@@ -23,7 +23,7 @@ int iswhitespace(char c)
 	}
 }
 
-struct result count()
+struct result count(FILE * fptr)
 {
 	struct result r;
 	r.lines = 0;
@@ -31,7 +31,7 @@ struct result count()
 	r.characters = 0;
 
 	char c, prev = '\0';
-	while((c = fgetc(stdin)) != EOF)
+	while((c = fgetc(fptr)) != EOF)
 	{
 		r.characters++;
 		
@@ -57,25 +57,23 @@ int main(int argc, char * argv[])
 	{
 		for(int i=1; i < argc; i++)
 		{
-			int fd = open(argv[i], O_RDONLY);
+			FILE * fptr = fopen(argv[i], "r");
 			if(fd < 0)
 			{
 				fprintf(stderr, "Failed to open file: %s\n", argv[i]);
 				exit(-1);
 			}
 
-			dup2(fd, 0);
-			struct result r = count();
+			struct result r = count(ptr);
+			fclose(fptr);
 
 			printf("\t%d\t%d\t%d\n", r.lines, r.words, r.characters);
 		}
 	}
 	else
 	{
-		struct result r = count();
+		struct result r = count(stdin);
 		printf("\t%d\t%d\t%d\n", r.lines, r.words, r.characters);
 	}
-	
-
 	return 0;
 }

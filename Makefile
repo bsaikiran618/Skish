@@ -6,3 +6,7 @@ cat: cat.c
 	gcc cat.c -o cat
 echo: echo.c
 	gcc echo.c -o echo
+mkdir: mkdir.c
+	gcc mkdir.c -o mkdir
+ls: ls.c
+	gcc ls.c -o ls
