@@ -68,6 +68,7 @@ void listDirectoryContents(char * directoryPath)
 
 int main(int argc, char *argv[])
 {
+	fprintf(stderr, "=== Skish ls ===\n");
 	if(argc == 1)
 	{
 		//print contents of the current directory.

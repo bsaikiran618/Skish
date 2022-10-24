@@ -7,7 +7,7 @@
 int main(int argc, char * argv[])
 {
 
-	fprintf(stderr, "Welcome to SKcat\n");
+	fprintf(stderr, "=== Skish cat ===\n");
 
 	if(argc == 1)
 	{

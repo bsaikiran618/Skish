@@ -2,6 +2,7 @@
 
 int main(int argc, char *argv[])
 {
+	fprintf(stderr, "=== Skish echo ===\n");
 		
 	for(int i=1; i < argc; i++)
 	{

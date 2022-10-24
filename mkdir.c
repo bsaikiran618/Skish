@@ -8,6 +8,7 @@
 
 int main(int argc, char * argv[])
 {
+	fprintf(stderr, "=== Skish mkdir ===\n");
 	if(argc != 2)
 	{
 		fprintf(stderr, "Usage: %s <pathname of the new directory>\n", argv[0]);

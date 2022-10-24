@@ -1,4 +1,6 @@
-all: helper.c helper.h main.c wc cat echo mkdir ls
+all: skish wc cat echo mkdir ls ps
+
+skish: helper.c main.c helper.h
 	gcc helper.c main.c -lreadline -o skish
 wc: wc.c
 	gcc wc.c -o wc
@@ -10,3 +12,5 @@ mkdir: mkdir.c
 	gcc mkdir.c -o mkdir
 ls: ls.c
 	gcc ls.c -o ls
+ps: ps.c
+	gcc ps.c -o ps

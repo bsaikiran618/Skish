@@ -52,6 +52,7 @@ int main(int argc, char * argv[])
 {
 	//if argc > 1, read them as files.
 	//else read from stdin
+	fprintf(stderr, "=== Skish wc ===\n");
 
 	if(argc > 1)
 	{
