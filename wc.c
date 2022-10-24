@@ -58,13 +58,13 @@ int main(int argc, char * argv[])
 		for(int i=1; i < argc; i++)
 		{
 			FILE * fptr = fopen(argv[i], "r");
-			if(fd < 0)
+			if(!fptr)
 			{
 				fprintf(stderr, "Failed to open file: %s\n", argv[i]);
 				exit(-1);
 			}
 
-			struct result r = count(ptr);
+			struct result r = count(fptr);
 			fclose(fptr);
 
 			printf("\t%d\t%d\t%d\n", r.lines, r.words, r.characters);

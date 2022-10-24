@@ -1,4 +1,4 @@
-all: helper.c helper.h main.c
+all: helper.c helper.h main.c wc cat echo mkdir ls
 	gcc helper.c main.c -lreadline -o skish
 wc: wc.c
 	gcc wc.c -o wc
