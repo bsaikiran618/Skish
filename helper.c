@@ -185,8 +185,20 @@ char * revStr(char *str)
 }
 void handleRedirection(int *argc, char *argv[])
 {
-	//find a '<' or '>'
+	/*
+		This function checks if there is any redirection
+		involved for this command.
+		If there is, it removes the ">" or "<" symbols
+		and the respective filename from argv. It will
+		also update the value of argc.
+	*/
+
+	//maintain value of old argc.
 	int oldArgc = *argc;
+
+	//J is a variable used to copy values of the argv
+	//into itself but by skipping the redirection
+	//symbols and filenames
 
 	int j = 1;
 	for(int i = 1; i < oldArgc; i++)
