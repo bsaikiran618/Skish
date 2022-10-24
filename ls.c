@@ -9,6 +9,8 @@
 
 #include <dirent.h>
 
+#define COLS 10
+
 void listDirectoryContents(char * directoryPath)
 {
 	struct stat statbuf;
@@ -35,6 +37,7 @@ void listDirectoryContents(char * directoryPath)
 			{
 				struct dirent * entry;
 				int i = 0;
+
 				while(entry = readdir(dir))
 				{
 					if(entry->d_type == DT_DIR) //print directories in blue
@@ -43,7 +46,7 @@ void listDirectoryContents(char * directoryPath)
 
 					i++;
 
-					if(i == 10)
+					if(i == COLS)
 					{
 						i = 0;
 						printf("\n");
