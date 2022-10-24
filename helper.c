@@ -5,6 +5,8 @@
 #include <string.h>
 #include <errno.h>
 #include <unistd.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include <sys/types.h>
 #include <dirent.h>
 
@@ -151,7 +153,7 @@ char * trim(char * message)
 	strcpy(message, temp);
 	return message;
 }
-int tokenize(char *string, char **argv, int len)
+int tokenize(char *string, char **argv, int len, int * argc)
 {
 	char *token = strtok(string, " ");
 	int i = 0;
@@ -164,6 +166,7 @@ int tokenize(char *string, char **argv, int len)
 	}
 	
 	argv[i] = NULL;
+	*argc = i;
 
 	return 0;
 }
@@ -179,4 +182,52 @@ char * revStr(char *str)
 		right--;
 	}
 	return str;
+}
+void handleRedirection(int *argc, char *argv[])
+{
+	//find a '<' or '>'
+	int oldArgc = *argc;
+
+	int j = 1;
+	for(int i = 1; i < oldArgc; i++)
+	{
+		int mode = -1;
+		if(strcmp(argv[i], "<") == 0)
+		{
+			mode = 0;
+		}
+		else if(strcmp(argv[i], ">") == 0)
+		{
+			mode = 1;
+		}
+
+		if((mode == 0) || (mode == 1))
+		{
+			if((i+1 < oldArgc) && argv[i+1] != NULL)
+			{
+				int fd = open(argv[i+1], mode ? (O_CREAT|O_WRONLY) : (O_RDONLY), S_IRWXU | S_IRWXG | S_IRWXO);
+				if(fd < 0)
+				{
+					fprintf(stderr, "No such file: %s\n", argv[i+1]);
+					return;
+				}
+				else
+				{
+					dup2(fd, mode);
+					*argc = *argc - 2;
+					i++;
+				}
+			}
+			else
+			{
+				fprintf(stderr, "No file specified for redirection");
+			}
+		}
+		else
+		{
+			argv[j++] = argv[i];
+		}
+	}
+
+	argv[*argc] = NULL;
 }

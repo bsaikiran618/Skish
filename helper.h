@@ -14,7 +14,8 @@ void printErr(char *);
 void getPrompt(char *);
 int findExecutable(char *, char *);
 int handleShellCommand(char*[]);
-int tokenize(char *, char **, int);
+int tokenize(char *, char **, int, int *);
+void handleRedirection(int *, char *[]);
 char * trim(char *);
 char *revStr(char *);
 

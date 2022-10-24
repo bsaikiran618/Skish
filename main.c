@@ -13,44 +13,6 @@
 
 #include "helper.h"
 
-void executeCommand(char *myCommand)
-{
-	/*
-		We have to split the command into parts delimited by space.
-		e.g:
-			"foo -Aex -K"
-		has to be split into ["foo", "-Aex", "-K"]
-		and then we can call execve
-	*/
-	char *argv[MAX_STATEMENT_LENGTH];
-	tokenize(myCommand, argv, MAX_STATEMENT_LENGTH);
-
-	//argv[0] is the name of the command/executable.
-
-	char executableDirPath[MAX_CWDPATH_SIZE];
-
-	int executableExists = findExecutable(argv[0], executableDirPath);
-
-	if(executableExists < 0)
-	{
-		//this could be a shell command.
-		handleShellCommand(argv);
-	}
-	else
-	{
-		//this is an executable only.
-		char pathName[MAX_STATEMENT_LENGTH + MAX_CWDPATH_SIZE];
-		sprintf(pathName, "%s/%s", executableDirPath, argv[0]); //skish only executes commands in the /bin directory.
-
-		int ret = execv(pathName, argv);
-		if(ret < 0)
-		{
-			errExit("Failed to execute command");
-		}
-	}
-
-}
-
 int getCommand(char *myCommand, char *restOfIt, int len)
 {
 	char *promptLine = (char *) malloc(sizeof(char) * (MAX_CWDPATH_SIZE + MAX_USERNAME_SIZE + MAX_HOSTNAME_SIZE + 2));
@@ -96,10 +58,11 @@ int getCommand(char *myCommand, char *restOfIt, int len)
 	return specialCode;
 }
 
-void runCommand(char *executableDirPath, char *argv[])
+void runCommand(char *executableDirPath, int argc, char *argv[])
 {
+	handleRedirection(&argc, argv);
 	char pathName[MAX_CWDPATH_SIZE];
-	sprintf(pathName, "%s/%s", executableDirPath, argv[0]); //skish only executes commands in the /bin directory.
+	sprintf(pathName, "%s/%s", executableDirPath, argv[0]);
 	int ret = execv(pathName, argv);
 
 	if(ret < 0)
@@ -116,7 +79,9 @@ void getStatement()
 	if(strlen(myCommand) == 0) return;
 
 	char * argv[MAX_STATEMENT_LENGTH];
-	tokenize(myCommand, argv, MAX_STATEMENT_LENGTH);
+	int argc = 0;
+
+	tokenize(myCommand, argv, MAX_STATEMENT_LENGTH, &argc);
 
 	//check if this command is an executable or a shell command.
 	char executableDirPath[MAX_CWDPATH_SIZE];
@@ -188,13 +153,13 @@ void getStatement()
 					close(commandPipe[0]);
 					write(commandPipe[1], restOfIt, strlen(restOfIt));
 
-					runCommand(executableDirPath, argv);
+					runCommand(executableDirPath, argc, argv);
 					exit(0);
 				}
 			}
 			else
 			{
-				runCommand(executableDirPath, argv);
+				runCommand(executableDirPath, argc, argv);
 				exit(0);
 			}
 		}
